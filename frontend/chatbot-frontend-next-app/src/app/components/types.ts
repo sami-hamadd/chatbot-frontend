@@ -1,10 +1,12 @@
+// src/app/components/types.ts
+
 export type MessageRole = 'user' | 'assistant';
 
 export interface Message {
-    id: string;        // local unique identifier
-    role: MessageRole; // 'user' or 'assistant'
-    content: string;
-    figure?: any;      // optional plotly figure
+    id: string;                 // local unique identifier
+    role: MessageRole;          // 'user' or 'assistant'
+    content: string;            // plain text
+    image?: string;             // base64-encoded image, if any
 }
 
 export interface ChatResponse {

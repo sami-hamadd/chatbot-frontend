@@ -1,6 +1,7 @@
+// src/app/components/ChatMessage.tsx
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ReactNode } from 'react';
 import {
     Card,
     Text,
@@ -26,6 +27,7 @@ import { parseFinalReply, convertJsonToTableData } from '@/app/utils/jsonParser'
    Helpers
 -------------------------------------------------------------------*/
 const isArabic = (txt: string) => /\p{Script=Arabic}/u.test(txt);
+
 const pickVoice = (langPrefix: string): SpeechSynthesisVoice | undefined => {
     const voices = window.speechSynthesis.getVoices();
     if (voices.length === 0) return undefined;
@@ -36,8 +38,9 @@ const pickVoice = (langPrefix: string): SpeechSynthesisVoice | undefined => {
     if (google) return google;
     return byLang[0];
 };
-const getPlainText = (content: React.ReactNode): string =>
-    typeof content === 'string' ? content : '';
+
+const getPlainText = (content: string): string => content;
+
 const useVoicesReady = () => {
     const [, update] = useState({});
     useEffect(() => {
@@ -45,24 +48,28 @@ const useVoicesReady = () => {
         if (window.speechSynthesis.getVoices().length === 0) {
             window.speechSynthesis.addEventListener('voiceschanged', handler);
         }
-        // Cleanup listener on unmount
         return () => {
             window.speechSynthesis.removeEventListener('voiceschanged', handler);
-        }
+        };
     }, []);
 };
-
 
 /* ------------------------------------------------------------------
    Component
 -------------------------------------------------------------------*/
 interface ChatMessageProps {
     role: MessageRole;
-    content: React.ReactNode;
-    visualization?: React.ReactNode;
+    content: string;       // plain text (may be empty if image)
+    image?: string;        // base‑64 PNG/JPEG if backend returned an image
+    children?: ReactNode;  // typing indicator, etc.
 }
 
-export default function ChatMessage({ role, content, visualization }: ChatMessageProps) {
+export default function ChatMessage({
+    role,
+    content,
+    image,
+    children,
+}: ChatMessageProps) {
     const computedColorScheme = useComputedColorScheme('light');
     const bg =
         role === 'user'
@@ -110,7 +117,7 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
                 }, 1000);
             })
             .catch((err) => {
-                console.error("Failed to copy text: ", err);
+                console.error('Failed to copy text: ', err);
                 setCopied(false);
             });
     };
@@ -146,7 +153,6 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
         };
         utteranceRef.current = utter;
         setSpeaking(true);
-        console.log("Calling synth.speak() with utterance:", utter);
         try {
             synth.speak(utter);
         } catch (e) {
@@ -174,13 +180,12 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
         };
     }, [content]);
 
-    /* --------------------------- Render -----------------------------*/
-    const renderContent = () => {
-        if (typeof content !== 'string') return content;
-        return parseFinalReply(content).map((part, idx) => {
+    /* ------------------------ Rendering logic ----------------------*/
+    const renderTextContent = () =>
+        parseFinalReply(content).map((part, idx) => {
             if (part.type === 'text') {
                 return (
-                    <Text dir="auto" key={idx} size="lg" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                    <Text ta={"right"} dir="auto" key={idx} size="lg" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                         {part.content.split(/(\[https:\/\/[^\]]+\])/g).map((seg: string, i: number) => {
                             const match = seg.match(/\[(https:\/\/[^\]]+)\]/);
                             return match ? (
@@ -196,25 +201,27 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
             }
             if (part.type === 'json') {
                 return (
-                    <div key={idx}>
-                        <DynamicTable data={convertJsonToTableData(part.content)} />
-                    </div>
+                    <DynamicTable
+                        key={idx}
+                        data={convertJsonToTableData(part.content)}
+                    />
                 );
             }
             return null;
         });
-    };
+
     const actionGroupStyles = {
-        backgroundColor: computedColorScheme === 'light' ? '#f8f9fa' : '#212529',
+        backgroundColor: computedColorScheme === 'light' ? '#f8f9fa' : '#00251c',
         border: `1px solid ${computedColorScheme === 'light' ? '#ced4da' : '#495057'}`,
         borderRadius: 8,
         padding: 4,
         position: 'absolute' as const,
         bottom: '4px',
-        left: '10px',
+        right: '10px',
         zIndex: 1,
     };
     const actionColor = computedColorScheme === 'light' ? '' : 'white';
+
     return (
         <Card
             style={{
@@ -223,23 +230,39 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
                 alignSelf: 'flex-start',
                 marginBottom: '0.1rem',
                 paddingBottom: isAssistant ? '50px' : undefined,
+                minWidth: isAssistant ? 160 : 0,
             }}
-            radius={'lg'}
+            radius="lg"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
-            {renderContent()}
-
-            {visualization && <div>{visualization}</div>}
-
-            {isAssistant && hovered && (
-                <Group
-                    gap="xs"
-                    w="fit-content"
+            {/* Typing indicator takes precedence */}
+            {children ? (
+                children
+            ) : image ? (
+                /* Base‑64 image rendering */
+                <img
+                    src={`data:image/png;base64,${image}`}
+                    alt="Generated by AI"
                     style={{
-                        ...actionGroupStyles,
+                        width: '100%',
+                        maxWidth: '600px',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        borderRadius: 8,
+                        border: `1px solid ${computedColorScheme === 'light' ? '#ced4da' : '#495057'}`,
                     }}
-                >            {/* Thumb Up */}
+                />
+
+            ) : (
+                /* Plain / rich‑parsed text */
+                renderTextContent()
+            )}
+
+            {/* Assistant action buttons */}
+            {isAssistant && hovered && !children && (
+                <Group gap="xs" w="fit-content" style={actionGroupStyles} wrap='nowrap'>
+                    {/* Thumb Up */}
                     <Tooltip
                         label="أعجبني"
                         withArrow
@@ -255,47 +278,55 @@ export default function ChatMessage({ role, content, visualization }: ChatMessag
                     <Tooltip
                         label="لم يعجبني"
                         withArrow
-                        styles={tooltipStyles}
                         transitionProps={{ transition: 'pop', duration: 150 }}
+                        styles={tooltipStyles}
                     >
                         <ActionIcon size="sm" variant="subtle" color={actionColor}>
                             <IconThumbDown size={16} />
                         </ActionIcon>
                     </Tooltip>
 
-                    {/* Copy Button */}
-                    <Tooltip
-                        label="نسخ"
-                        withArrow
-                        styles={tooltipStyles}
-                        transitionProps={{ transition: 'pop', duration: 150 }}
-                    >
-                        <ActionIcon
-                            size="sm"
-                            variant="subtle"
-                            onClick={handleCopy}
-                            color={actionColor}
+                    {/* Copy */}
+                    {!!content && (
+                        <Tooltip
+                            label="نسخ"
+                            withArrow
+                            transitionProps={{ transition: 'pop', duration: 150 }}
+                            styles={tooltipStyles}
                         >
-                            {copied ? <IconCheck size={16} color="green" /> : <IconCopy size={16} />}
-                        </ActionIcon>
-                    </Tooltip>
+                            <ActionIcon
+                                size="sm"
+                                variant="subtle"
+                                onClick={handleCopy}
+                                color={actionColor}
+                            >
+                                {copied ? (
+                                    <IconCheck size={16} color="green" />
+                                ) : (
+                                    <IconCopy size={16} />
+                                )}
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
 
-                    {/* Speak/Stop Button */}
-                    <Tooltip
-                        label={speaking ? 'إيقاف' : 'قراءة'}
-                        withArrow
-                        styles={tooltipStyles}
-                        transitionProps={{ transition: 'pop', duration: 150 }}
-                    >
-                        <ActionIcon
-                            size="sm"
-                            variant="subtle"
-                            onClick={handleSpeakToggle}
-                            color={actionColor}
+                    {/* Speak / Stop */}
+                    {!!content && (
+                        <Tooltip
+                            label={speaking ? 'إيقاف' : 'قراءة'}
+                            withArrow
+                            transitionProps={{ transition: 'pop', duration: 150 }}
+                            styles={tooltipStyles}
                         >
-                            {speaking ? <IconPlayerStop size={16} /> : <IconVolume2 size={16} />}
-                        </ActionIcon>
-                    </Tooltip>
+                            <ActionIcon
+                                size="sm"
+                                variant="subtle"
+                                onClick={handleSpeakToggle}
+                                color={actionColor}
+                            >
+                                {speaking ? <IconPlayerStop size={16} /> : <IconVolume2 size={16} />}
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
                 </Group>
             )}
         </Card>

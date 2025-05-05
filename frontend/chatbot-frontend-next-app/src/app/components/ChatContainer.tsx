@@ -1,13 +1,8 @@
+// src/app/components/ChatContainer.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    Alert,
-    Box,
-    ScrollArea,
-    Stack,
-    Center,
-} from '@mantine/core';
+import { Alert, Box, ScrollArea, Stack, Center } from '@mantine/core';
 import ChatMessage from '@/app/components/ChatMessage';
 import ChatInput from '@/app/components/ChatInput';
 import { Message } from '@/app/components/types';
@@ -26,9 +21,7 @@ export default function ChatContainer() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    useEffect(scrollToBottom, [messages]);
 
     useEffect(() => {
         const handleClearChat = () => {
@@ -41,42 +34,32 @@ export default function ChatContainer() {
 
     const handleSend = async (userInput: string) => {
         setError(null);
-
+        // 1) add user bubble
         const newUserMessage: Message = {
             id: Date.now().toString(),
             role: 'user',
             content: userInput,
         };
-
         setMessages((prev) => [...prev, newUserMessage]);
+
         setLoading(true);
-
         try {
-            const lastSix = messages.slice(-6).map((msg) => ({
-                role: msg.role,
-                content: msg.content,
-            }));
+            // 2) call backend
+            const response: ChatResponse = await sendChatMessage({ user_message: userInput });
 
-            const requestPayload = {
-                user_message: userInput,
-                history: lastSix,
-            };
-
-            const response: ChatResponse = await sendChatMessage(requestPayload);
-
-            const figureObject = response.figure ? JSON.parse(response.figure) : null;
-
+            // 3) build assistant bubble
             const newAssistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                role: response.role,
-                content: response.content,
-                figure: figureObject,
+                role: 'assistant',
+                // if it's text, show in content; if it's image, put base64 in `image`
+                content: response.type === 'text' ? response.content : '',
+                image: response.type === 'image' ? response.content : undefined,
             };
 
             setMessages((prev) => [...prev, newAssistantMessage]);
-        } catch (error: any) {
-            console.error('Error:', error.message);
-            setError(error.message);
+        } catch (err: any) {
+            console.error('Error:', err);
+            setError(err.message ?? 'Unknown error');
         } finally {
             setLoading(false);
         }
@@ -95,14 +78,11 @@ export default function ChatContainer() {
                 </Center>
             ) : (
                 <>
-                    <ScrollArea style={{ flexGrow: 1, }} scrollbarSize={20} mt="lg">
+                    <ScrollArea style={{ flexGrow: 1 }} scrollbarSize={20} mt="lg">
                         <Stack
                             gap="md"
                             style={{
-                                paddingLeft: '1rem',
-                                paddingRight: '5rem',
-                                paddingTop: '1rem',
-                                paddingBottom: '1rem',
+                                padding: '1rem 5rem 1rem 1rem',
                                 maxWidth: '1200px',
                                 margin: '0 auto',
                                 width: '50%',
@@ -114,11 +94,18 @@ export default function ChatContainer() {
                                     key={msg.id}
                                     role={msg.role}
                                     content={msg.content}
-                                    visualization={msg.figure}
+                                    image={msg.image}
                                 />
                             ))}
                             {loading && (
-                                <ChatMessage key="waiting" role="assistant" content={<TypingIndicator />} />
+                                <ChatMessage
+                                    key="waiting"
+                                    role="assistant"
+                                    content=""
+                                    image={undefined}
+                                >
+                                    <TypingIndicator />
+                                </ChatMessage>
                             )}
                             {error && (
                                 <Alert icon={<IconAlertCircle size={16} />} color="red">
