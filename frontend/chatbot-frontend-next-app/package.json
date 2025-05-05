@@ -17,6 +17,7 @@
     "@mui/material": "^7.0.2",
     "@mui/x-data-grid": "^8.2.0",
     "@tabler/icons-react": "^3.31.0",
+    "lottie-react": "^2.4.1",
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

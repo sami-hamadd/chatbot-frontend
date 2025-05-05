@@ -12,6 +12,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider, Button, Stack } from '@mui/material';
 import { useComputedColorScheme } from '@mantine/core';
 import { IconListCheck, IconTableOptions } from '@tabler/icons-react';
+import { theme } from 'theme';
 
 interface DynamicTableProps {
     data: any[];
@@ -22,8 +23,8 @@ const darkTheme = createTheme({
     palette: {
         mode: 'dark',
         background: {
-            default: "#b18731",
-            paper: "#b18731",
+            default: theme?.colors?.mainColor?.[6],
+            paper: theme?.colors?.mainColor?.[6],
         },
         text: {
             primary: '#ffffff',
@@ -73,19 +74,6 @@ function CustomFooter(props: any) {
                     }}
                 />
 
-                {/* Use Stack for consistent spacing between buttons */}
-                <Button
-                    variant="text"
-                    startIcon={<IconTableOptions size={18} />}
-                >
-                    Raw Data
-                </Button>
-                <Button
-                    variant="text"
-                    startIcon={<IconListCheck size={18} />}
-                >
-                    Data Quality Profiling
-                </Button>
             </Stack>
 
             <GridPagination {...props} />
@@ -137,7 +125,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ data }) => {
                     sx={{
                         width: '100%',
                         overflow: 'auto',
-                        marginBottom: '1.5rem',
+                        marginBottom: '1rem',
                         marginTop: '1.5rem',
                     }}
                 >
@@ -172,20 +160,20 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ data }) => {
                                 //border: '2px solid #f1f1f1', // optional border
                             },
                             // For Firefox:
-                            scrollbarColor: isDark ? '#888 #152f55' : '#f1f1f1',
+                            scrollbarColor: isDark ? theme?.colors?.mainColor?.[6] : '#f1f1f1',
                             scrollbarWidth: 'thin',
                             '& .MuiDataGrid-cell': {
-                                backgroundColor: isDark ? '#152f55' : undefined,
+                                backgroundColor: isDark ? theme?.colors?.mainColor?.[6] : undefined,
                                 color: isDark ? 'white' : undefined,
                                 display: 'flex',
                                 // alignItems: 'right',
                                 justifyContent: 'right',
                                 textAlign: 'right',
-                                border: isDark ? '1px solid #102444' : '1px solid #eeeeee',
+                                border: isDark ? '0.2px solid #515151' : '1px solid #eeeeee',
                             },
                             '& .MuiDataGrid-footerContainer': {
                                 //direction: 'ltr',
-                                backgroundColor: isDark ? '#152f55' : undefined,
+                                backgroundColor: isDark ? theme?.colors?.mainColor?.[6] : undefined,
                             },
                         }}
                     />

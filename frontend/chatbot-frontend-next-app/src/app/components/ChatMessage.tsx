@@ -206,18 +206,28 @@ export default function ChatMessage({
                         data={convertJsonToTableData(part.content)}
                     />
                 );
+            } else if (part.type === 'table') {
+                // --- NEW: Markdown Table Rendering ---
+                // The content should already be in the { data: [...] } format from parseMarkdownTable
+                const tableData = part.content?.data || [];
+                return tableData.length > 0 ? (
+                    <DynamicTable
+                        key={`md-table-${idx}`}
+                        data={tableData}
+                    />
+                ) : null; // Don't render if Markdown table parsing failed or yielded no data
             }
             return null;
         });
 
     const actionGroupStyles = {
-        backgroundColor: computedColorScheme === 'light' ? '#f8f9fa' : '#00251c',
-        border: `1px solid ${computedColorScheme === 'light' ? '#ced4da' : '#495057'}`,
+        // backgroundColor: computedColorScheme === 'light' ? '#f8f9fa' : '#00251c',
+        // border: `1px solid ${computedColorScheme === 'light' ? '#ced4da' : '#495057'}`,
         borderRadius: 8,
         padding: 4,
         position: 'absolute' as const,
         bottom: '4px',
-        right: '10px',
+        left: '10px',
         zIndex: 1,
     };
     const actionColor = computedColorScheme === 'light' ? '' : 'white';
@@ -229,8 +239,10 @@ export default function ChatMessage({
                 backgroundColor: bg,
                 alignSelf: 'flex-start',
                 marginBottom: '0.1rem',
-                paddingBottom: isAssistant ? '50px' : undefined,
-                minWidth: isAssistant ? 160 : 0,
+                paddingBottom: isAssistant && (content || image) ? '50px' : undefined,
+                minWidth: isAssistant ? 700 : 0,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
             }}
             radius="lg"
             onMouseEnter={() => setHovered(true)}

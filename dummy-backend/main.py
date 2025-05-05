@@ -1,4 +1,5 @@
 # backend/main.py
+import time
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -43,7 +44,39 @@ def send_request(request: RequestModel):
         return {"response": imgres, "type": "image"}
 
     # Save non‑plot conversation
-    textres = "sample text response"
+    # textres = "lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+    textres = """
+The following\   
+| ID  | Product      | Price | In Stock |
+|-----|--------------|------:|:--------:|
+| 1   | Widget       |  9.99 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+| 2   | Gizmo        | 19.95 |    No    |
+| 3   | Doodad       |  4.50 |   Yes    |
+
+it represents products and their prices in a table format. The table includes columns for .
+"""
+    time.sleep(10)
+
     print(f"Saved conversation: [User {user_id}] {user_inquiry} → {textres}")
     return {"response": textres, "type": "text"}
 
