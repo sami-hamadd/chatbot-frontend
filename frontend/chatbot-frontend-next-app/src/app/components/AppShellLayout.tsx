@@ -95,7 +95,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                         height={150}
                     // style={{ alignSelf: 'flex-start' }}
                     />
-                    <Group mt={20}
+                    <Group mt={40}
                     >
                         <NewChatButton />
                         <ToggleThemeButton />
