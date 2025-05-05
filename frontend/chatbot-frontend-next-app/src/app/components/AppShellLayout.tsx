@@ -41,7 +41,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
             // }}
             styles={{
                 main: {
-                    paddingTop: 80,
+                    paddingTop: 100,
                     height: '100vh',
                     overflow: 'hidden',
                     display: 'flex',

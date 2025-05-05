@@ -112,7 +112,7 @@ export default function ChatContainer() {
                                 paddingBottom: '1rem',
                                 maxWidth: '1200px',
                                 margin: '0 auto',
-                                width: '70%',
+                                width: '60%',
                                 boxSizing: 'border-box',
                             }}
                         >

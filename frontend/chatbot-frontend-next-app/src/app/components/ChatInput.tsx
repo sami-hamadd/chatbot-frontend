@@ -1,13 +1,10 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Textarea, Group, ActionIcon, useComputedColorScheme, Button } from '@mantine/core';
-import { IconArrowUp, IconListSearch, IconSearch } from '@tabler/icons-react';
+import { IconArrowUp, IconListSearch, IconSearch, IconMicrophone } from '@tabler/icons-react';
 import { theme } from 'theme';
 
 interface ChatInputProps {
     onSend: (message: string) => void;
-    // A boolean flag to indicate if the conversation is empty
     isEmpty?: boolean;
 }
 
@@ -16,15 +13,61 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
     const computedColorScheme = useComputedColorScheme('light');
     const isDark = computedColorScheme === 'dark';
     const [deepSearchActive, setDeepSearchActive] = useState(false);
+    const [isListening, setIsListening] = useState(false);
 
-    // Customize as needed
+    // Initialize recognition objects
+    const [recognition, setRecognition] = useState<any>(null);
+    const [speechRecognitionList, setSpeechRecognitionList] = useState<any>(null);
+
     const customColor = isDark ? '#00251c' : '#f1f3f5';
     const buttonColor = theme?.colors?.mainColor?.[1];
+
+    // Initialize speech recognition
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                const speechRecognitionList = new SpeechGrammarList();
+
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'ar-SA'; // Arabic Saudi Arabia
+
+                recognition.onresult = (event: any) => {
+                    const transcript = event.results[0][0].transcript;
+                    setMessageText(prev => prev + ' ' + transcript);
+                    setIsListening(false);
+                };
+
+                recognition.onerror = (event: any) => {
+                    console.error('Speech recognition error:', event.error);
+                    setIsListening(false);
+                };
+
+                setRecognition(recognition);
+                setSpeechRecognitionList(speechRecognitionList);
+            }
+        }
+    }, []);
 
     const handleSend = () => {
         if (messageText.trim() === '') return;
         onSend(messageText.trim());
         setMessageText('');
+    };
+
+    const handleStartListening = () => {
+        if (recognition) {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+            setIsListening(!isListening);
+        }
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -33,6 +76,7 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
             handleSend();
         }
     };
+
     const textAreaBgColor = customColor;
 
     return (
@@ -43,8 +87,6 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 16,
-                // direction: 'rtl',
-                scrollMargin: 0,
             }}
         >
             <Textarea
@@ -53,15 +95,10 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                 placeholder="...اسألني أي شيء"
                 value={messageText}
                 onChange={(e) => setMessageText(e.currentTarget.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
-                    }
-                }}
+                onKeyDown={handleKeyDown}
                 autosize
-                minRows={isEmpty ? 5 : 1}
-                maxRows={isEmpty ? 5 : 2}
+                minRows={isEmpty ? 1 : 1}
+                maxRows={isEmpty ? 2 : 2}
                 radius="xl"
                 styles={{
                     input: {
@@ -73,6 +110,9 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                         border: 'none',
                         padding: isEmpty ? 40 : 15,
                         overflowY: 'auto',
+                        '::placeholder': {
+                            fontSize: '28px !important',
+                        },
                     },
                 }}
                 style={{
@@ -95,19 +135,46 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                 }}
             >
                 <Group justify="space-between" w="100%">
+                    <Group>
+                        <ActionIcon
+                            size={30}
+                            radius="xl"
+                            variant={messageText.trim() === '' ? "outline" : "filled"}
+                            onClick={handleSend}
+                            // disabled={messageText.trim() === ''}
+                            color={buttonColor}
+                            mr={10}
+                            mb={10}
+                        >
+                            <IconArrowUp />
+                        </ActionIcon>
+                        {recognition ? (
+                            <ActionIcon
+                                size={30}
+                                radius="xl"
+                                variant="filled"
+                                onClick={handleStartListening}
+                                color={isListening ? 'red' : buttonColor}
+                                // mr={10}
+                                mb={10}
+                            >
+                                <IconMicrophone size={20} color={isListening ? 'white' : undefined} />
+                            </ActionIcon>
+                        ) : (
+                            <ActionIcon
+                                size={30}
+                                radius="xl"
+                                variant="filled"
+                                disabled
+                                color="gray"
+                                // mr={10}
+                                mb={10}
+                            >
+                                <IconMicrophone size={20} />
+                            </ActionIcon>
+                        )}
+                    </Group>
 
-                    <ActionIcon
-                        size={40}
-                        radius="xl"
-                        variant="filled"
-                        onClick={handleSend}
-                        disabled={messageText.trim() === ''}
-                        color={buttonColor}
-                        mr={10}
-                        mb={10}
-                    >
-                        <IconArrowUp />
-                    </ActionIcon>
                     <Button
                         size="compact-sm"
                         radius="xl"
@@ -121,7 +188,6 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                     >
                         Deep Search
                     </Button>
-
                 </Group>
             </div>
         </div>
