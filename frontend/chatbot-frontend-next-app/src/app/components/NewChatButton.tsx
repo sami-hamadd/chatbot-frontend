@@ -10,7 +10,7 @@ export default function NewChatButton() {
     // Modal state for confirming a new chat
     const [opened, { open, close }] = useDisclosure(false);
     const computedColorScheme = useComputedColorScheme('light');
-    const buttonColor = computedColorScheme === 'dark' ? theme?.colors?.goldAccent?.[7] : '#405276';
+    const buttonColor = theme?.colors?.mainColor?.[1];
     // Clear chat event
     const clearChat = () => {
         if (typeof window !== 'undefined') {
@@ -21,13 +21,13 @@ export default function NewChatButton() {
 
     return (
         <>
-            {/* <Button radius={"xl"} fw="lighter" onClick={open} leftSection={<IconMessageCirclePlus size={20} />} color={buttonColor}
+            <Button radius={"xl"} onClick={open} leftSection={<IconMessageCirclePlus size={20} />} variant={computedColorScheme === "dark" ? "filled" : "outline"} color={buttonColor}
             >
                 محادثة جديدة
-            </Button> */}
-            <ActionIcon size="md" variant="light" onClick={open} color={buttonColor}>
+            </Button>
+            {/* <ActionIcon size="md" variant="light" onClick={open} color={buttonColor}>
                 <IconPlus />
-            </ActionIcon>
+            </ActionIcon> */}
 
             {/* Confirmation Modal */}
             <Modal dir="rtl" centered opened={opened} onClose={close} title="تأكيد بدأ محادثة جديدة">

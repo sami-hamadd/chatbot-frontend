@@ -87,16 +87,19 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                             </ActionIcon>
                         </Tooltip>
                     </Group> */}
-
                     <Image
                         component={NextImage}
                         src={computedColorScheme === 'dark' ? DarkLogo : LightLogo}
                         alt="Chatbot Logo"
                         width={450}
                         height={150}
-                    // style={{ alignSelf: 'flex-start' }} 
+                    // style={{ alignSelf: 'flex-start' }}
                     />
-                    <ToggleThemeButton />
+                    <Group mt={20}
+                    >
+                        <NewChatButton />
+                        <ToggleThemeButton />
+                    </Group>
                 </Group>
             </AppShell.Header>
 

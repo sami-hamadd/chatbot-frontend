@@ -1,10 +1,11 @@
 import { ActionIcon, Tooltip, useComputedColorScheme, useMantineColorScheme } from "@mantine/core";
 import { IconMoon, IconSun } from "@tabler/icons-react";
+import { theme } from "theme";
 
 export default function ToggleThemeButton() {
     const { setColorScheme } = useMantineColorScheme();
     const computedColorScheme = useComputedColorScheme('light');
-    const buttonColor = '#337d6a';
+    const buttonColor = theme?.colors?.mainColor?.[0];
 
     const toggleColorScheme = () =>
         setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
@@ -15,8 +16,7 @@ export default function ToggleThemeButton() {
                 radius={"lg"}
                 onClick={toggleColorScheme}
                 size="lg"
-                mt={20}
-                variant="light"
+                variant={computedColorScheme === "dark" ? "filled" : "outline"}
                 color={buttonColor}
             >
                 {computedColorScheme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
