@@ -6,9 +6,7 @@ import {
     Box,
     ScrollArea,
     Stack,
-    Text,
     Center,
-    Group,
 } from '@mantine/core';
 import ChatMessage from '@/app/components/ChatMessage';
 import ChatInput from '@/app/components/ChatInput';
@@ -17,9 +15,6 @@ import { sendChatMessage, ChatResponse } from '@/app/api/chat';
 import { TypingIndicator } from '@/app/components/TypingIndicator';
 import { IconAlertCircle } from '@tabler/icons-react';
 import AnimatedTitle from '@/app/components/AnimatedTitle';
-import NextImage from 'next/image';
-// import GCPLogo from 'public/gcp.svg';
-import { Icon } from '@mui/material';
 
 export default function ChatContainer() {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -92,17 +87,15 @@ export default function ChatContainer() {
     return (
         <Box style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {isEmpty ? (
-                // Just render the centered content when empty
-                <Center style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}> {/* Adjust style: Use flexGrow to fill space */}
+                <Center style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                     <Stack align="center" gap="lg" px="md" maw={'1200px'}>
                         <AnimatedTitle />
                         <ChatInput onSend={handleSend} isEmpty />
                     </Stack>
                 </Center>
             ) : (
-                // Render ScrollArea + Input when NOT empty
-                <> {/* Use Fragment to group siblings */}
-                    <ScrollArea style={{ flexGrow: 1, /* msScrollbarTrackColor: 'transparent' - maybe remove */ }} scrollbarSize={20} mt="lg">
+                <>
+                    <ScrollArea style={{ flexGrow: 1, }} scrollbarSize={20} mt="lg">
                         <Stack
                             gap="md"
                             style={{
@@ -112,7 +105,7 @@ export default function ChatContainer() {
                                 paddingBottom: '1rem',
                                 maxWidth: '1200px',
                                 margin: '0 auto',
-                                width: '60%',
+                                width: '50%',
                                 boxSizing: 'border-box',
                             }}
                         >
@@ -135,7 +128,6 @@ export default function ChatContainer() {
                             <div ref={messagesEndRef} />
                         </Stack>
                     </ScrollArea>
-                    {/* Sticky Input Box */}
                     <Box
                         style={{
                             position: 'sticky',
@@ -144,14 +136,12 @@ export default function ChatContainer() {
                             padding: '1rem',
                             maxWidth: '1200px',
                             margin: '0 auto',
-                            // Add background potentially if needed
                         }}
                     >
                         <ChatInput onSend={handleSend} isEmpty={false} />
                     </Box>
                 </>
             )}
-            {/* Footer removed */}
         </Box>
     );
 }
