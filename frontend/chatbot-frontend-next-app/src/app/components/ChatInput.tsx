@@ -175,7 +175,7 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                         )}
                     </Group>
 
-                    <Button
+                    {/* <Button
                         size="compact-sm"
                         radius="xl"
                         variant={deepSearchActive ? 'filled' : 'outline'}
@@ -187,7 +187,7 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                         mb={10}
                     >
                         Deep Search
-                    </Button>
+                    </Button> */}
                 </Group>
             </div>
         </div>
