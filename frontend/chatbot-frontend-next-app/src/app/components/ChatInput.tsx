@@ -82,7 +82,8 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
     return (
         <div
             style={{
-                width: '600px',
+                width: '100%',
+                maxWidth: isEmpty ? 720 : 600,
                 margin: '0 auto',
                 display: 'flex',
                 flexDirection: 'column',

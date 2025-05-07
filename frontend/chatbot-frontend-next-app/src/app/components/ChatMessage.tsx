@@ -255,7 +255,9 @@ export default function ChatMessage({
                 marginBottom: '0.1rem',
                 paddingBottom: isAssistant && (content || image) ? '50px' : undefined,
                 // minWidth: isAssistant ? 700 : 0,
+                // maxWidth: '100%',
                 maxWidth: '100%',
+                wordBreak: 'break-word',
                 boxSizing: 'border-box',
             }}
             radius="xl"

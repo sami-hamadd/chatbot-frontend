@@ -43,7 +43,10 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                 main: {
                     paddingTop: 100,
                     height: '100vh',
-                    overflow: 'hidden',
+                    // overflow: 'hidden',
+                    overflowY: 'hidden',
+                    overflowX: 'auto',
+                    WebkitOverflowScrolling: 'touch',
                     display: 'flex',
                     flexDirection: 'column',
                     backgroundColor: computedColorScheme === 'dark' ? theme?.colors?.mainColor?.[7] : '',

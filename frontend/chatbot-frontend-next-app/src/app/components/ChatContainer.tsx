@@ -71,7 +71,7 @@ export default function ChatContainer() {
         <Box style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {isEmpty ? (
                 <Center style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Stack align="center" gap="lg" px="md" maw={'1200px'}>
+                    <Stack w={"100%"} align="center" gap="lg" px="lg" maw={'1200px'}>
                         <AnimatedTitle />
                         <ChatInput onSend={handleSend} isEmpty />
                     </Stack>
@@ -82,11 +82,18 @@ export default function ChatContainer() {
                         <Stack
                             gap="md"
                             style={{
-                                padding: '1rem 5rem 1rem 1rem',
-                                maxWidth: '1200px',
+                                // padding: '1rem 5rem 1rem 1rem',
+                                // maxWidth: '1200px',
+                                // margin: '0 auto',
+                                // width: '50%',
+                                // boxSizing: 'border-box',
+                                padding: '1.5rem',
                                 margin: '0 auto',
-                                width: '50%',
-                                boxSizing: 'border-box',
+                                width: '100%',
+                                maxWidth: 900,
+                                [`@media (min-width: 62em)`]: {
+                                    width: '50%',
+                                },
                             }}
                         >
                             {messages.map((msg) => (
@@ -119,9 +126,14 @@ export default function ChatContainer() {
                         style={{
                             position: 'sticky',
                             bottom: 0,
-                            width: '70%',
+                            width: '100%',
+                            maxWidth: 1200,
+                            [`@media (min-width: 62em)`]: {
+                                width: '70%',
+                            },
+                            // width: '70%',
                             padding: '1rem',
-                            maxWidth: '1200px',
+                            // maxWidth: '1200px',
                             margin: '0 auto',
                         }}
                     >
