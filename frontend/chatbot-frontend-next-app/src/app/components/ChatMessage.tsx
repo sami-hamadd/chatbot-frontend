@@ -22,6 +22,7 @@ import {
 import { MessageRole } from '@/app/components/types';
 import DynamicTable from '@/app/components/DynamicTable';
 import { parseFinalReply, convertJsonToTableData } from '@/app/utils/jsonParser';
+import { theme } from 'theme';
 
 /* ------------------------------------------------------------------
    Helpers
@@ -73,11 +74,23 @@ export default function ChatMessage({
     const computedColorScheme = useComputedColorScheme('light');
     const bg =
         role === 'user'
-            ? computedColorScheme === 'light'
+            ? (computedColorScheme === 'light'
+                ? theme?.colors?.mainColor?.[1]
+                : theme?.colors?.mainColor?.[4])
+            : (computedColorScheme === 'light'
                 ? '#f1f3f5'
-                : '#00251c'
-            : 'transparent';
+                : '#292929');
 
+
+    // '#f1f3f5';
+    const textColor =
+        role === 'user'
+            ? computedColorScheme === 'light'
+                ? '#ffffff'
+                : '#ffffff'
+            : computedColorScheme === 'dark'
+                ? '#ffffff'
+                : '#000000';
     const isAssistant = role !== 'user';
     const [hovered, setHovered] = useState(false);
     const [speaking, setSpeaking] = useState(false);
@@ -237,14 +250,15 @@ export default function ChatMessage({
             style={{
                 position: 'relative',
                 backgroundColor: bg,
-                alignSelf: 'flex-start',
+                color: textColor,
+                alignSelf: isAssistant ? 'flex-end' : 'flex-start',
                 marginBottom: '0.1rem',
                 paddingBottom: isAssistant && (content || image) ? '50px' : undefined,
-                minWidth: isAssistant ? 700 : 0,
+                // minWidth: isAssistant ? 700 : 0,
                 maxWidth: '100%',
                 boxSizing: 'border-box',
             }}
-            radius="lg"
+            radius="xl"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >

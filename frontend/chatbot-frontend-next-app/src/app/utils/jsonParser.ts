@@ -1,55 +1,56 @@
 // src/app/utils/parser.ts (continued)
 // src/app/utils/parser.ts (or your chosen file name)
 
-// Helper to check if a line looks like a Markdown table row (| col | col |)
+// 1) Row detector: is there a '|' … later another '|' ?
 function isMarkdownTableRow(line: string): boolean {
-  const trimmed = line.trim();
-  // Ensure it starts and ends with '|' and has at least one '|' inside
-  return trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2 && trimmed.slice(1, -1).includes('|');
+  const first = line.indexOf('|');
+  const last = line.lastIndexOf('|');
+  return first !== -1 && last !== -1 && last > first;
 }
 
-// Helper to check if a line is a Markdown table separator (|---|---|)
+// 2) Separator detector: same, but the between-pipes must only be -, :, | or space
 function isMarkdownTableSeparator(line: string): boolean {
-  const trimmed = line.trim();
-  // Must be a table row, and the content between pipes must only be '-', ':', or '|' and spaces
-  return isMarkdownTableRow(line) && /^[|:-\s]+$/.test(trimmed.slice(1, -1));
+  const first = line.indexOf('|');
+  const last = line.lastIndexOf('|');
+  if (first === -1 || last === -1 || last <= first) return false;
+  const between = line.slice(first + 1, last).trim();
+  return /^[\s|:-]+$/.test(between);
 }
 
-// Helper to parse the collected markdown table lines into structured data
-// Output format matches what DynamicTable expects via convertJsonToTableData
+// 3) Table parser: slice out header, then each data row
 function parseMarkdownTable(lines: string[]): { data: any[] } | null {
-  if (lines.length < 2 || !isMarkdownTableRow(lines[0]) || !isMarkdownTableSeparator(lines[1])) {
-    // Needs at least a valid header and separator
-    return null;
-  }
+  if (lines.length < 2) return null;
+  if (!isMarkdownTableRow(lines[0]) || !isMarkdownTableSeparator(lines[1])) return null;
 
-  const headerLine = lines[0];
-  const dataLines = lines.slice(2).filter(line => isMarkdownTableRow(line)); // Only process valid data rows
+  // extract headers
+  const hFirst = lines[0].indexOf('|');
+  const hLast = lines[0].lastIndexOf('|');
+  const headers = lines[0]
+    .slice(hFirst + 1, hLast)
+    .split('|')
+    .map(h => h.trim());
 
-  // Extract headers: split by '|', trim, filter out empty strings resulting from start/end pipes
-  const headers = headerLine.split('|')
-    .map(h => h.trim())
-    .filter((h, index, arr) => h !== '' || (index > 0 && index < arr.length - 1)); // Keep only non-empty segments between pipes
+  // extract each data row
+  const data = lines
+    .slice(2)
+    .filter(isMarkdownTableRow)
+    .map(row => {
+      const rFirst = row.indexOf('|');
+      const rLast = row.lastIndexOf('|');
+      const cells = row
+        .slice(rFirst + 1, rLast)
+        .split('|')
+        .map(c => c.trim());
 
-  if (headers.length === 0) return null; // No valid headers found
-
-  // Parse data rows
-  const tableData = dataLines.map(rowLine => {
-    // Extract cells: split by '|', trim, filter out empty strings from start/end pipes
-    const cells = rowLine.split('|')
-      .map(c => c.trim())
-      .filter((c, index, arr) => index > 0 && index < arr.length - 1); // Keep only segments between pipes
-
-    const rowObj: { [key: string]: string } = {};
-    headers.forEach((header, index) => {
-      // Handle cases where a row might have fewer columns than the header
-      rowObj[header] = cells[index] !== undefined ? cells[index] : '';
+      // build object (missing cells → empty string)
+      const obj: Record<string, string> = {};
+      headers.forEach((hdr, i) => {
+        obj[hdr] = cells[i] ?? '';
+      });
+      return obj;
     });
-    return rowObj;
-  });
 
-  // Return in the format expected by DynamicTable (similar to convertJsonToTableData output)
-  return { data: tableData };
+  return { data };
 }
 
 // ... (Keep convertJsonToTableData and the modified parseFinalReply below)

@@ -78,7 +78,7 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
     };
 
     const textAreaBgColor = customColor;
-
+    const borderColor = isDark ? '1px solid grey' : '1px solid grey';
     return (
         <div
             style={{
@@ -90,8 +90,9 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
             }}
         >
             <Textarea
+
                 dir='auto'
-                variant="filled"
+                variant="unstyled"
                 placeholder="...اسألني أي شيء"
                 value={messageText}
                 onChange={(e) => setMessageText(e.currentTarget.value)}
@@ -107,7 +108,10 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                         textAlign: 'right',
                         borderBottomLeftRadius: 0,
                         borderBottomRightRadius: 0,
-                        border: 'none',
+                        // border: 'transparent',
+                        borderTop: borderColor,
+                        borderLeft: borderColor,
+                        borderRight: borderColor,
                         padding: isEmpty ? 40 : 15,
                         overflowY: 'auto',
                         '::placeholder': {
@@ -130,8 +134,11 @@ export default function ChatInput({ onSend, isEmpty = false }: ChatInputProps) {
                     borderTopRightRadius: 0,
                     borderBottomLeftRadius: 35,
                     borderBottomRightRadius: 35,
+                    borderBottom: borderColor,
+                    borderLeft: borderColor,
+                    borderRight: borderColor,
                     width: '100%',
-                    border: 'none',
+                    // border: 'none',
                 }}
             >
                 <Group justify="space-between" w="100%">
